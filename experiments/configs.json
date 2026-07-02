@@ -1,23 +1,18 @@
 {
   "EXP-001": {
-    "name": "Baseline Control Flow",
-    "total_agents": 100,
-    "starting_workers": 10,
+    "hypothesis": "Under control workloads without injection, asynchronous system loops sustain stability.",
+    "total_agents": 80,
+    "starting_workers": 12,
     "max_queue_size": 200,
-    "drop_rate": 0.00
+    "drop_rate": 0.00,
+    "expected_behavior": "NOMINAL_STABILITY"
   },
   "EXP-002": {
-    "name": "High Concurrency Congestion Test",
-    "total_agents": 500,
-    "starting_workers": 5,
-    "max_queue_size": 100,
-    "drop_rate": 0.15
-  },
-  "EXP-003": {
-    "name": "Catastrophic Fault Propagation Study",
-    "total_agents": 1000,
-    "starting_workers": 2,
-    "max_queue_size": 50,
-    "drop_rate": 0.40
+    "hypothesis": "High queue utilization coupled with probabilistic drops will trigger congestion collapse.",
+    "total_agents": 400,
+    "starting_workers": 4,
+    "max_queue_size": 80,
+    "drop_rate": 0.20,
+    "expected_behavior": "CONGESTION_COLLAPSE_FEEDBACK_LOOP"
   }
 }
