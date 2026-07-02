@@ -1,42 +1,42 @@
-# Distributed Systems Stress-Research Platform (DS-SRP)
+# Agent Chaos Framework
+### A framework for studying congestion and fault propagation in asynchronous queue-based systems.
 
-An event-driven experimental testbed designed to study asynchronous concurrency dynamics, congestion collapse profiles, and closed-loop mitigation loops under probabilistic fault injection.
+## 📌 Project Concept
+The Agent Chaos Framework is a local python-based testbed designed to simulate how backend microservices handle concurrent load spikes, resource constraints, and network instability. 
 
-## 🔬 System Model Formulation
+Instead of hiding application layers behind broad abstractions, this tool orchestrates hundreds of concurrent worker tasks communicating across a single bounded queue layer. This makes it possible to isolate, monitor, and record exactly how systemic failures propagate through an application runtime in real-time.
 
-The system is mathematically modeled as an asynchronous multi-agent network configuration:
+## 📐 Bounded Queue Stability Model
 
-$$\text{Workload Input } (\mathcal{W}) = \sum \text{Agents(Stochastic Workloads)}$$
+The system tracks backlog acceleration boundaries using a discrete calculation loop inside the execution engine. Stability balances follow standard fluid queue dynamics:
 
-$$\text{Processing Core } (\mathcal{P}) = \text{Bounded Service Processors } (\mu)$$
+$$\frac{d(\text{Queue})}{dt} = \lambda(t) - \mu(t)$$
 
-$$\text{System Boundaries } (\mathcal{L}) = \text{Finite Capacity Buffer Queue}$$
+Where $\lambda(t)$ represents the incoming traffic generation rate from independent agents, and $\mu(t)$ represents the active consumer system processing rate.
 
-A structural system collapse threshold state is met when:
+A **System Collapse State** is flagged by the detector when either of these criteria are met:
+1. The queue acceleration derivative $d(\text{Queue})/dt$ remains continuously positive while the buffer saturation exceeds $85\%$.
+2. The rolling $p95$ latency calculation gradient surges beyond a $1.0\times$ ($100\%$) growth interval within a single monitoring window.
 
-$$\frac{d(\text{Queue})}{dt} > \mu \quad \text{AND} \quad \Delta p95 \text{ Latency Gradient} > \theta$$
+## 🧱 Software Directory Design
 
-## 📐 Failure Taxonomy Model Matrix
+* **`core/`**: Controls asynchronous task lifecycle execution using Python `asyncio` loops. Houses event objects and throttle feedback loops.
+* **`fault_model/`**: Contains probabilistic delay matrices that emulate connection degradation and service errors (HTTP 500/503 patterns).
+* **`observability/`**: Aggregates streaming metric windows to calculate active tracking statistics (rolling p95, throughput capacity, slope gradients).
+* **`experiments/`**: Executes distinct testing setups using parameters supplied by JSON configuration schemas.
 
-The platform maps system degradation paths to five exact operational fault vectors:
-* **`CONGESTION_FAILURE`**: Bounded buffer resource saturation.
-* **`WORKER_STARVATION`**: Processing blocks locked waiting during async delay phases.
-* **`QUEUE_OVERFLOW`**: Dropped ingest payloads throwing structured $503$ states.
-* **`LATENCY_CASCADE`**: Downstream propagation of processing overhead delays.
-* **`FAULT_PROPAGATION_SPIKE`**: Clustered multi-node failure loops induced by internal probabilistic perturbation functions.
+## 📊 Scientific Control Validation & Benchmarks
+To guarantee the simulator tracks runtime state changes reliably, validation checks were conducted against standard configuration bounds:
 
-## 🛠️ Modular Platform Architecture
+| Configuration Matrix | Target Agent Load | Base Worker Allocation | Observed Queue Trajectory | Resulting State Profile |
+| :--- | :--- | :--- | :--- | :--- |
+| **EXP-001 (Control)** | 80 Agents | 12 Workers | Sustained Empty Buffer ($dK/dt \le 0$) | **STABLE** |
+| **EXP-002 (Stress-Test)** | 400 Agents | 4 Workers | Buffer Saturation Peak ($dK/dt > 15.0$) | **COLLAPSED** |
 
-* **`core/`**: Implements decoupled, event-driven task loops using strict thread-safe `asyncio` event streams. Contains closed-loop adaptive pacing logic.
-* **`fault_model/`**: Houses independent pseudo-random perturbation functions modeling network failure states.
-* **`observability/`**: Processes streaming windowed data points to run continuous gradient tracking analysis.
-* **`experiments/`**: Automated script execution engine processing declarative research profiles.
+## 🛡️ Framework Limitations & Scope
+* **Single-Process Context**: Execution relies entirely on local asynchronous event loops on a single machine; it does not model separate physical distributed hardware over a real network grid.
+* **In-Memory Buffer Layer**: Workload messages pass through memory via `asyncio.Queue`, bypassing physical TCP/IP stack simulations or network serialization layers.
 
-## 📈 System Evolution Timeline
-
-* **Phase 1 (Foundational Framework):** Basic asynchronous engine deployment establishing producer-consumer queue channels.
-* **Phase 2 (Degradation Matrix Implementation):** Integrated specialized probabilistic chaos-injection routines modeling system degradation.
-* **Phase 3 (Statistical Observability Upgrades):** Built metrics aggregation logic capable of isolating $p50$, $p95$, and $p99$ operational thresholds.
-* **Phase 4 (Elastic Load Adaption):** Engineered micro-scaling capabilities addressing queue saturation dynamics on demand.
-* **Phase 5 (Mathematical Failure Interception):** Formulated an explicit real-time streaming analytical layer defining gradient collapse.
-* **Phase 6 (Automated Scientific Testbed Integration):** Realized the final modular event-driven research platform supporting deterministic scenario comparison.
+## 🚀 Planned Roadmap Iterations
+* **OpenTelemetry Specification Integration**: Upgrading the tracking framework to emit structured telemetry payloads directly to external visualization dashboards.
+* **Network Emulation Layer**: Introducing artificial socket latency matrices to test how the orchestrator reacts under strict packet drop and jitter profiles.
