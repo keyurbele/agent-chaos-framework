@@ -1,0 +1,23 @@
+{
+  "EXP-001": {
+    "name": "Baseline Control Flow",
+    "total_agents": 100,
+    "starting_workers": 10,
+    "max_queue_size": 200,
+    "drop_rate": 0.00
+  },
+  "EXP-002": {
+    "name": "High Concurrency Congestion Test",
+    "total_agents": 500,
+    "starting_workers": 5,
+    "max_queue_size": 100,
+    "drop_rate": 0.15
+  },
+  "EXP-003": {
+    "name": "Catastrophic Fault Propagation Study",
+    "total_agents": 1000,
+    "starting_workers": 2,
+    "max_queue_size": 50,
+    "drop_rate": 0.40
+  }
+}
