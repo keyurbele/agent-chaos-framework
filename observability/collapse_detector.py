@@ -1,32 +1,32 @@
 import time
 
-class ScientificCollapseDetector:
-    def __init__(self, start_time: float, gradient_threshold: float = 1.5):
+class CollapseDetector:
+    def __init__(self, start_time: float, gradient_threshold: float = 1.0):
         self.start_time = start_time
         self.gradient_threshold = gradient_threshold
         self.previous_p95 = 0.0
 
-    def evaluate_mathematical_model(self, current_p95: float, queue_depth: int, max_queue: int) -> dict:
+    def evaluate_mathematical_model(self, current_p95: float, queue_depth: int, max_queue: int, dq_dt: float) -> dict:
         """
-        Calculates mathematical stability boundaries.
-        Collapse conditions met when: d(Queue)/dt > worker_capacity AND latency_gradient > threshold
+        Calculates system stability state based on real-time parameters.
+        Tracks d(Queue)/dt to verify if input rate persistently eclipses drain rate.
         """
         status = "STABLE"
         anomalies = []
 
-        # Quantify Latency Overlap Gradient
+        # Track Latency Growth Rate
         if self.previous_p95 > 0:
-            gradient = (current_p95 - self.previous_p95) / self.previous_p95
-            if gradient > self.gradient_threshold:
+            latency_gradient = (current_p95 - self.previous_p95) / self.previous_p95
+            if latency_gradient > self.gradient_threshold:
                 status = "COLLAPSED"
-                anomalies.append(f"Latency Explosion Gradient Breached (+{gradient*100:.1f}%)")
+                anomalies.append(f"Latency Spike Gradient Exception (+{latency_gradient*100:.1f}%)")
 
-        # Quantify Queue Pressure Ratio
+        # 2. Honest Math Verification: Cross-reference dq_dt directly with queue saturation
         pressure_ratio = queue_depth / max_queue
-        if pressure_ratio >= 0.85:
+        if pressure_ratio >= 0.85 or (dq_dt > 15.0 and pressure_ratio > 0.60):
             status = "COLLAPSED"
-            anomalies.append(f"Queue Divergence Overflow Balance (Saturation: {pressure_ratio*100:.1f}%)")
-        elif pressure_ratio >= 0.50 and status != "COLLAPSED":
+            anomalies.append(f"Queue Accumulation Divergence (dK/dt={dq_dt:.1f} req/sec at {pressure_ratio*100:.1f}% load)")
+        elif pressure_ratio >= 0.40 and status != "COLLAPSED":
             status = "DEGRADED"
 
         self.previous_p95 = current_p95
